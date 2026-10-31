@@ -1,0 +1,20 @@
+[Unit]
+Description=NoneBot QQ persona agent
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/bots/qqbot
+EnvironmentFile=%h/bots/qqbot/config/nonebot.env
+EnvironmentFile=%h/bots/qqbot/config/persona_agent.env
+Environment=PERSONA_AGENT_CONFIG=%h/bots/qqbot/config/persona_agent.yaml
+Environment=PERSONA_LOG_DIR=%h/bots/qqbot/logs/nonebot
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=%h/bots/qqbot/nonebot/.venv/bin/python %h/bots/qqbot/ops/start_nonebot.py
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=90
+UMask=0077
+
+[Install]
+WantedBy=default.target

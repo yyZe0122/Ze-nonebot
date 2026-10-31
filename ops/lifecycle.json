@@ -1,0 +1,11 @@
+{
+  "temporary_hours": 24,
+  "orphan_quarantine_days": 7,
+  "application_log_days": 14,
+  "application_log_bytes": 209715200,
+  "maintenance_log_days": 30,
+  "maintenance_log_bytes": 20971520,
+  "backup_days": 7,
+  "persistent_content_alert_bytes": 5368709120,
+  "minimum_free_ratio": 0.15
+}

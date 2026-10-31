@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily QQ bot backup
+
+[Timer]
+OnCalendar=*-*-* 04:30:00 Asia/Shanghai
+Persistent=true
+RandomizedDelaySec=60
+
+[Install]
+WantedBy=timers.target

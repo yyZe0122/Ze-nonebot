@@ -1,0 +1,10 @@
+[Unit]
+Description=QQ bot consistent database and asset backup
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/bots/qqbot
+ExecStart=/usr/bin/python3 -B %h/bots/qqbot/ops/maintain.py backup
+UMask=0077
+TimeoutStartSec=1800
+Nice=10
