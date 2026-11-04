@@ -189,7 +189,7 @@ class PersonaService:
         if not accepted:
             await self.audit(event, "queue_full")
             now = asyncio.get_running_loop().time()
-            if (event.direct or event.command) and now >= self._busy_notice.get(
+            if (event.scope == "private" or event.at_me) and now >= self._busy_notice.get(
                 event.route, 0
             ):
                 self._busy_notice[event.route] = now + 30
@@ -363,12 +363,6 @@ class PersonaService:
         plan = await self.participation.consider(focus)
         if not plan.reply:
             await self.audit(focus, plan.reason)
-            if plan.reason.startswith("participation_failed:"):
-                reason = plan.reason.partition(":")[2]
-                if reason in {"request_timeout", "queue_timeout", "upstream_timeout"}:
-                    await self._failure_notice(
-                        focus, plan, reason, epoch, valid, purpose="participation"
-                    )
             return True
         if not await valid():
             return False
@@ -731,26 +725,22 @@ class PersonaService:
         return result.sent > 0 or result.outcome != "stale"
 
     async def _failure_notice(
-        self, event, plan, reason: str, epoch: int, valid, *, purpose="chat"
+        self, event, plan, reason: str, epoch: int, valid
     ) -> None:
-        timeout = reason in {"request_timeout", "queue_timeout", "upstream_timeout"}
-        if event.proactive or not (
-            plan.direct or plan.continuation or (event.scope == "group" and timeout)
+        if (
+            event.proactive
+            or not plan.direct
+            or (event.scope == "group" and not event.at_me)
         ):
             return
-        if timeout:
-            stage = "参与判断" if purpose == "participation" else "聊天生成"
-            limit = (
-                self.config.model_tasks.participation.timeout_seconds
-                if purpose == "participation"
-                else self.config.scheduler.chat_timeout_seconds
-            )
+        if reason in {"request_timeout", "queue_timeout", "upstream_timeout"}:
+            limit = self.config.scheduler.chat_timeout_seconds
             detail = {
                 "request_timeout": "超时",
                 "queue_timeout": "排队超时",
                 "upstream_timeout": "收到上游超时",
             }[reason]
-            text = f"{stage}{detail}（本地上限 {limit:g} 秒），本条未生成回复。"
+            text = f"聊天生成{detail}（本地上限 {limit:g} 秒），本条未生成回复。"
         elif reason == "rate_limited":
             text = "这边暂时忙不过来，这句没答上，稍后再叫我一下。"
         elif reason == "policy_blocked":

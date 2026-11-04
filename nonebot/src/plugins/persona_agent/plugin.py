@@ -177,6 +177,10 @@ async def _(bot: Bot, event: MessageEvent) -> None:
             reply_text=reply_text,
             reply_media=reply_media,
             to_other=to_other,
+            at_me=any(
+                segment.type == "at" and str(segment.data.get("qq", "")) == bot.self_id
+                for segment in event.original_message
+            ),
         )
     )
     raise FinishedException

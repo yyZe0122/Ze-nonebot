@@ -173,6 +173,7 @@ class ParticipationGate:
             priority=1,
         )
         if isinstance(result, ModelFailure):
+            await self.note(event, False)
             return Participation(False, reason="participation_failed:" + result.reason)
         try:
             decision = parse_decision(result.text, ParticipationDecision)
@@ -185,6 +186,7 @@ class ParticipationGate:
                 event.request_id,
                 issues,
             )
+            await self.note(event, False)
             return Participation(False, reason="invalid_participation")
         if decision.target_message_id != event.message_id:
             logger.warning(
@@ -193,6 +195,7 @@ class ParticipationGate:
                 event.message_id,
                 decision.target_message_id,
             )
+            await self.note(event, False)
             return Participation(False, reason="invalid_participation_target")
         logger.info(
             "Participation: request_id={} reply={} continuation={} reason={}",

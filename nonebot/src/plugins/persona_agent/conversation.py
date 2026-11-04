@@ -39,6 +39,7 @@ class ChatEvent:
     media_followup: bool = False
     media_parent_id: int | None = None
     image_search: str = ""
+    at_me: bool = False
 
     @property
     def route(self) -> tuple[str, str, int]:
